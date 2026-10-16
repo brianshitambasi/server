@@ -40,12 +40,55 @@ exports.getProspect = asyncHandler(async (req, res) => {
 });
 
 exports.updateProspect = asyncHandler(async (req, res) => {
-  const allowed = ['status', 'notes', 'nextFollowUpDate', 'lastContactedAt', 'leadCategory'];
+  const allowed = ['status', 'notes', 'nextFollowUpDate', 'lastContactedAt', 'leadCategory', 'whatsapp'];
   const patch = {};
   allowed.forEach((k) => { if (req.body[k] !== undefined) patch[k] = req.body[k]; });
 
-  const prospect = await Prospect.findByIdAndUpdate(req.params.id, patch, { new: true });
+  // Validate whatsapp if present
+  if (patch.whatsapp !== undefined) {
+    const phone = String(patch.whatsapp).trim();
+    const digits = phone.replace(/\D/g, '');
+    if (phone && (/[a-zA-Z@]/.test(phone) || digits.length < 7 || digits.length > 15)) {
+      throw ApiError.badRequest('WhatsApp must be a valid phone number (7–15 digits, no letters)');
+    }
+    patch.whatsapp = phone;
+  }
+
+  const prospect = await Prospect.findById(req.params.id);
   if (!prospect) throw ApiError.notFound('Prospect not found');
+
+  const oldDate = prospect.nextFollowUpDate ? new Date(prospect.nextFollowUpDate) : null;
+  const newDate = patch.nextFollowUpDate ? new Date(patch.nextFollowUpDate) : null;
+  const dateChanged =
+    newDate &&
+    (!oldDate || newDate.toISOString().slice(0, 10) !== oldDate.toISOString().slice(0, 10));
+
+  Object.assign(prospect, patch);
+  await prospect.save();
+
+  // Auto-create a FollowUp when the date is newly set or changed
+  if (dateChanged) {
+    const startOfDay = new Date(newDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(startOfDay);
+    endOfDay.setDate(endOfDay.getDate() + 1);
+
+    const existing = await FollowUp.findOne({
+      prospect: prospect._id,
+      completed: false,
+      dueDate: { $gte: startOfDay, $lt: endOfDay }
+    });
+
+    if (!existing) {
+      await FollowUp.create({
+        prospect: prospect._id,
+        dueDate: newDate,
+        reason: 'Manual follow-up',
+        createdBy: req.user.id
+      });
+    }
+  }
+
   res.json({ success: true, prospect });
 });
 

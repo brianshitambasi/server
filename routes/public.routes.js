@@ -12,7 +12,18 @@ router.post(
   submissionLimiter,
   [
     body('fullName').isString().trim().isLength({ min: 2 }).withMessage('Full name required'),
-    body('whatsapp').isString().trim().isLength({ min: 6 }).withMessage('WhatsApp number required'),
+    body('whatsapp')
+      .isString()
+      .trim()
+      .notEmpty().withMessage('WhatsApp number required')
+      .matches(/^[0-9+\-\s()]+$/).withMessage('WhatsApp must contain digits only')
+      .custom((v) => {
+        const digits = v.replace(/\D/g, '');
+        if (digits.length < 7 || digits.length > 15) {
+          throw new Error('WhatsApp must be 7–15 digits');
+        }
+        return true;
+      }),
     body('email').isEmail().withMessage('Valid email required'),
     body('country').optional().isString(),
     body('preferredContact').optional().isIn(['whatsapp', 'phone', 'email']),
