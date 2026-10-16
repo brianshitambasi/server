@@ -44,5 +44,6 @@ router.delete('/uploads/product/*publicId', uploadController.deleteProductImage)
 
 // Analytics
 router.get('/analytics/sources', analyticsController.sources);
+router.get('/analytics/overview', analyticsController.overview);
 
 module.exports = router;
