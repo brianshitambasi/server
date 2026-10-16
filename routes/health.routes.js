@@ -4,7 +4,7 @@ const router = express.Router();
 router.get('/health', (req, res) => {
   res.json({
     success: true,
-    brand: 'YOBBYTECH',
+    brand: 'BRIAN — CEO TNT',
     team: 'TNT',
     role: 'CEO TNT',
     status: 'ok',
