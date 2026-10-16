@@ -18,6 +18,7 @@ router.get('/dashboard/stats', dashboardController.stats);
 router.get('/dashboard/recent', dashboardController.recentProspects);
 router.get('/dashboard/due-today', dashboardController.dueToday);
 router.get('/dashboard/upcoming', dashboardController.upcoming);
+router.get('/dashboard/followups-grouped', dashboardController.grouped);
 
 // Prospects
 router.get('/prospects', adminProspect.listProspects);
@@ -29,6 +30,7 @@ router.post('/prospects/:id/followups', adminProspect.createFollowUp);
 
 // Follow-ups
 router.patch('/followups/:id', adminProspect.completeFollowUp);
+router.patch('/followups/:id/snooze', dashboardController.snoozeFollowUp);
 
 // Products (CEO only)
 router.get('/products', productController.listAdmin);
