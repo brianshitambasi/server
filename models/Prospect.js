@@ -2,8 +2,15 @@ const mongoose = require('mongoose');
 
 const prospectSchema = new mongoose.Schema(
   {
+    prospectType: {
+      type: String,
+      enum: ['general', 'student'],
+      default: 'general',
+      index: true
+    },
+
     fullName: { type: String, required: true, trim: true },
-    whatsapp: { type: String, required: true, trim: true },
+    whatsapp: { type: String, trim: true, default: '' },
     email: { type: String, required: true, lowercase: true, trim: true },
     country: { type: String, default: '' },
     preferredContact: {
@@ -11,6 +18,8 @@ const prospectSchema = new mongoose.Schema(
       enum: ['whatsapp', 'phone', 'email'],
       default: 'whatsapp'
     },
+
+    // General qualification fields (optional for students)
     lookingFor: {
       type: String,
       enum: ['extra_income', 'business_opportunity', 'personal_development', 'networking', 'exploring'],
@@ -24,6 +33,14 @@ const prospectSchema = new mongoose.Schema(
       default: 'maybe'
     },
     questionsToClarify: { type: String, default: '' },
+
+    // Student-specific fields
+    studentInfo: {
+      school: { type: String, default: '' },
+      daysAvailable: { type: [String], default: [] },   // e.g. ['Mon','Wed','Fri']
+      course: { type: String, default: '' },
+      yearOfStudy: { type: String, default: '' }
+    },
 
     source: {
       type: String,

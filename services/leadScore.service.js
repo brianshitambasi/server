@@ -31,4 +31,32 @@ function scoreProspect(data) {
   return { score, category };
 }
 
-module.exports = { scoreProspect };
+function scoreStudent(data) {
+  let score = 0;
+
+  // Days available: more days = higher intent (max 40)
+  const days = Array.isArray(data.daysAvailable) ? data.daysAvailable.length : 0;
+  if (days >= 5) score += 40;
+  else if (days >= 3) score += 30;
+  else if (days >= 2) score += 20;
+  else if (days >= 1) score += 10;
+
+  // Year of study: final year students often want opportunity
+  const yr = (data.yearOfStudy || '').toLowerCase();
+  if (yr.includes('4') || yr.includes('final') || yr.includes('graduate')) score += 20;
+  else if (yr.includes('3')) score += 15;
+  else if (yr.includes('2')) score += 10;
+  else if (yr.trim()) score += 5;
+
+  // Optional extras
+  if (data.course && data.course.trim()) score += 5;
+
+  let category = 'NOT_READY';
+  if (score >= 50) category = 'HIGH_INTEREST';
+  else if (score >= 30) category = 'EXPLORING';
+  else if (score >= 15) category = 'FOLLOW_UP';
+
+  return { score, category };
+}
+
+module.exports = { scoreProspect, scoreStudent };
