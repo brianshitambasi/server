@@ -10,6 +10,7 @@ const productController = require('../controllers/product.controller');
 const dashboardController = require('../controllers/dashboard.controller');
 const analyticsController = require('../controllers/analytics.controller');
 const uploadController = require('../controllers/upload.controller');
+const reviewController = require('../controllers/review.controller');
 
 router.use(auth, requireRole('ceo'));
 
@@ -32,18 +33,23 @@ router.post('/prospects/:id/followups', adminProspect.createFollowUp);
 router.patch('/followups/:id', adminProspect.completeFollowUp);
 router.patch('/followups/:id/snooze', dashboardController.snoozeFollowUp);
 
-// Products (CEO only)
+// Products
 router.get('/products', productController.listAdmin);
 router.post('/products', productController.createProduct);
 router.patch('/products/:id', productController.updateProduct);
 router.delete('/products/:id', productController.deleteProduct);
 
-// Uploads (CEO only)
+// Uploads
 router.post('/uploads/product', upload.array('images', 6), uploadController.uploadProductImages);
 router.delete('/uploads/product/*publicId', uploadController.deleteProductImage);
 
 // Analytics
 router.get('/analytics/sources', analyticsController.sources);
 router.get('/analytics/overview', analyticsController.overview);
+
+// Reviews
+router.get('/reviews', reviewController.listAdmin);
+router.patch('/reviews/:id', reviewController.updateAdmin);
+router.delete('/reviews/:id', reviewController.deleteAdmin);
 
 module.exports = router;
