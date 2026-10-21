@@ -18,6 +18,33 @@ router.post(
   authController.login
 );
 
+router.post(
+  '/2fa/setup',
+  [body('setupToken').isString().notEmpty()],
+  validate,
+  authController.setup2FA
+);
+
+router.post(
+  '/2fa/enable',
+  [
+    body('setupToken').isString().notEmpty(),
+    body('code').isString().trim().isLength({ min: 6, max: 6 }).withMessage('6-digit code required')
+  ],
+  validate,
+  authController.enable2FA
+);
+
+router.post(
+  '/2fa/verify',
+  [
+    body('preAuthToken').isString().notEmpty(),
+    body('code').isString().trim().notEmpty()
+  ],
+  validate,
+  authController.verify2FA
+);
+
 router.get('/me', auth, authController.me);
 
 module.exports = router;
