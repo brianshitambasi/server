@@ -11,6 +11,7 @@ const dashboardController = require('../controllers/dashboard.controller');
 const analyticsController = require('../controllers/analytics.controller');
 const uploadController = require('../controllers/upload.controller');
 const reviewController = require('../controllers/review.controller');
+const backupController = require('../controllers/backup.controller');
 
 // All admin routes require a valid JWT + role=ceo
 router.use(auth, requireRole('ceo'));
@@ -52,5 +53,8 @@ router.get('/analytics/overview', analyticsController.overview);
 router.get('/reviews', reviewController.listAdmin);
 router.patch('/reviews/:id', reviewController.updateAdmin);
 router.delete('/reviews/:id', reviewController.deleteAdmin);
+
+// Backup
+router.get('/backup/download', backupController.download);
 
 module.exports = router;
