@@ -16,10 +16,14 @@ router.post(
     body('fullName').isString().trim().isLength({ min: 2 }).withMessage('Full name required'),
     body('whatsapp')
       .isString().trim().notEmpty().withMessage('WhatsApp number required')
-      .matches(/^[0-9+\-\s()]+$/).withMessage('WhatsApp must contain digits only')
       .custom((v) => {
         const digits = v.replace(/\D/g, '');
-        if (digits.length < 7 || digits.length > 15) throw new Error('WhatsApp must be 7–15 digits');
+        if (digits.length < 10 || digits.length > 15) {
+          throw new Error('Phone number must be complete and include the country code');
+        }
+        if (digits.startsWith('0')) {
+          throw new Error('Phone number must include the country code (do not start with 0)');
+        }
         return true;
       }),
     body('email').isEmail().withMessage('Valid email required'),
@@ -47,10 +51,14 @@ router.post(
     body('school').isString().trim().isLength({ min: 2 }).withMessage('School required'),
     body('whatsapp')
       .isString().trim().notEmpty().withMessage('WhatsApp number required')
-      .matches(/^[0-9+\-\s()]+$/).withMessage('WhatsApp must contain digits only')
       .custom((v) => {
         const digits = v.replace(/\D/g, '');
-        if (digits.length < 7 || digits.length > 15) throw new Error('WhatsApp must be 7–15 digits');
+        if (digits.length < 10 || digits.length > 15) {
+          throw new Error('Phone number must be complete and include the country code');
+        }
+        if (digits.startsWith('0')) {
+          throw new Error('Phone number must include the country code (do not start with 0)');
+        }
         return true;
       }),
     body('daysAvailable').isArray({ min: 1 }).withMessage('Pick at least one day'),
