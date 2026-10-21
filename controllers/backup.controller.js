@@ -25,13 +25,7 @@ exports.download = asyncHandler(async (req, res) => {
       communicationLogs: logs.length,
       reviews: reviews.length
     },
-    data: {
-      prospects,
-      products,
-      followups,
-      communicationLogs: logs,
-      reviews
-    }
+    data: { prospects, products, followups, communicationLogs: logs, reviews }
   };
 
   const filename = `yobbytech-backup-${new Date().toISOString().slice(0, 10)}.json`;
