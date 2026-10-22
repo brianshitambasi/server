@@ -25,6 +25,7 @@ router.get('/dashboard/followups-grouped', dashboardController.grouped);
 
 // ---- Prospects ----
 router.get('/prospects', adminProspect.listProspects);
+router.post('/prospects', adminProspect.createProspect);
 router.get('/prospects/:id', adminProspect.getProspect);
 router.patch('/prospects/:id', adminProspect.updateProspect);
 router.delete('/prospects/:id', adminProspect.deleteProspect);

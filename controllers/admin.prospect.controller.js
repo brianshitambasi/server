@@ -3,18 +3,21 @@ const FollowUp = require('../models/FollowUp');
 const CommunicationLog = require('../models/CommunicationLog');
 const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
+const { scoreProspect } = require('../services/leadScore.service');
 
 exports.listProspects = asyncHandler(async (req, res) => {
-  const { status, source, category, q, page = 1, limit = 20 } = req.query;
+  const { status, source, category, q, type, page = 1, limit = 20 } = req.query;
   const filter = {};
   if (status) filter.status = status;
   if (source) filter.source = source;
   if (category) filter.leadCategory = category;
+  if (type && ['general', 'student'].includes(type)) filter.prospectType = type;
   if (q) {
     filter.$or = [
       { fullName: new RegExp(q, 'i') },
       { email: new RegExp(q, 'i') },
-      { whatsapp: new RegExp(q, 'i') }
+      { whatsapp: new RegExp(q, 'i') },
+      { 'studentInfo.school': new RegExp(q, 'i') }
     ];
   }
 
@@ -25,6 +28,43 @@ exports.listProspects = asyncHandler(async (req, res) => {
   ]);
 
   res.json({ success: true, total, page: Number(page), limit: Number(limit), items });
+});
+
+exports.createProspect = asyncHandler(async (req, res) => {
+  const {
+    fullName, whatsapp, email, country,
+    preferredContact, lookingFor, previousExperience,
+    weeklyTime, wantsExplanation, questionsToClarify,
+    source, referralCode
+  } = req.body;
+
+  const existing = await Prospect.findOne({ email: (email || '').toLowerCase() });
+  if (existing) throw ApiError.conflict('A prospect with this email already exists.');
+
+  const { score, category } = scoreProspect({
+    lookingFor, previousExperience, weeklyTime, wantsExplanation, preferredContact
+  });
+
+  const prospect = await Prospect.create({
+    prospectType: 'general',
+    fullName, whatsapp, email, country,
+    preferredContact: preferredContact || 'whatsapp',
+    lookingFor: lookingFor || 'exploring',
+    previousExperience: !!previousExperience,
+    weeklyTime: weeklyTime || '',
+    wantsExplanation: wantsExplanation || 'yes',
+    questionsToClarify: questionsToClarify || '',
+    source: source || 'direct',
+    referralCode: referralCode || '',
+    leadScore: score,
+    leadCategory: category,
+    status: 'NEW'
+  });
+
+  res.status(201).json({
+    success: true,
+    prospect: { id: prospect._id }
+  });
 });
 
 exports.getProspect = asyncHandler(async (req, res) => {
@@ -44,12 +84,11 @@ exports.updateProspect = asyncHandler(async (req, res) => {
   const patch = {};
   allowed.forEach((k) => { if (req.body[k] !== undefined) patch[k] = req.body[k]; });
 
-  // Validate whatsapp if present
   if (patch.whatsapp !== undefined) {
     const phone = String(patch.whatsapp).trim();
     const digits = phone.replace(/\D/g, '');
-    if (phone && (/[a-zA-Z@]/.test(phone) || digits.length < 7 || digits.length > 15)) {
-      throw ApiError.badRequest('WhatsApp must be a valid phone number (7–15 digits, no letters)');
+    if (phone && (digits.length < 10 || digits.length > 15 || digits.startsWith('0'))) {
+      throw ApiError.badRequest('WhatsApp must be a valid phone number with country code');
     }
     patch.whatsapp = phone;
   }
@@ -59,14 +98,11 @@ exports.updateProspect = asyncHandler(async (req, res) => {
 
   const oldDate = prospect.nextFollowUpDate ? new Date(prospect.nextFollowUpDate) : null;
   const newDate = patch.nextFollowUpDate ? new Date(patch.nextFollowUpDate) : null;
-  const dateChanged =
-    newDate &&
-    (!oldDate || newDate.toISOString().slice(0, 10) !== oldDate.toISOString().slice(0, 10));
+  const dateChanged = newDate && (!oldDate || newDate.toISOString().slice(0, 10) !== oldDate.toISOString().slice(0, 10));
 
   Object.assign(prospect, patch);
   await prospect.save();
 
-  // Auto-create a FollowUp when the date is newly set or changed
   if (dateChanged) {
     const startOfDay = new Date(newDate);
     startOfDay.setHours(0, 0, 0, 0);
