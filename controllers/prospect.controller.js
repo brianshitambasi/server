@@ -2,6 +2,7 @@ const Prospect = require('../models/Prospect');
 const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 const { scoreProspect, scoreStudent } = require('../services/leadScore.service');
+const { sendProspectAlert, sendProspectWelcome } = require('../services/mail.service');
 
 exports.submitProspect = asyncHandler(async (req, res) => {
   const {
@@ -30,6 +31,10 @@ exports.submitProspect = asyncHandler(async (req, res) => {
     leadCategory: category,
     status: 'NEW'
   });
+
+  // Fire-and-forget emails
+  sendProspectAlert(prospect).catch(() => {});
+  sendProspectWelcome(prospect).catch(() => {});
 
   res.status(201).json({
     success: true,
@@ -77,6 +82,10 @@ exports.submitStudent = asyncHandler(async (req, res) => {
     leadCategory: category,
     status: 'NEW'
   });
+
+  // Fire-and-forget emails
+  sendProspectAlert(prospect).catch(() => {});
+  sendProspectWelcome(prospect).catch(() => {});
 
   res.status(201).json({
     success: true,
