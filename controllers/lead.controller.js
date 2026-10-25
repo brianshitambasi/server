@@ -1,7 +1,5 @@
 const Lead = require('../models/Lead');
 const asyncHandler = require('../utils/asyncHandler');
-const ApiError = require('../utils/ApiError');
-const { sendLeadMagnet } = require('../services/mail.service');
 
 exports.capture = asyncHandler(async (req, res) => {
   const { email, name, source, leadType } = req.body;
@@ -16,10 +14,6 @@ exports.capture = asyncHandler(async (req, res) => {
     },
     { new: true, upsert: true, setDefaultsOnInsert: true }
   );
-
-  if (sendLeadMagnet) {
-    sendLeadMagnet(lead).catch(() => {});
-  }
 
   res.status(201).json({ success: true, message: 'Thank you — check your inbox.' });
 });

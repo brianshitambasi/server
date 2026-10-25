@@ -5,6 +5,7 @@ const router = express.Router();
 const prospectController = require('../controllers/prospect.controller');
 const productController = require('../controllers/product.controller');
 const reviewController = require('../controllers/review.controller');
+const leadController = require('../controllers/lead.controller');
 const validate = require('../middleware/validate.middleware');
 const { submissionLimiter } = require('../middleware/rateLimit.middleware');
 
@@ -71,6 +72,17 @@ router.post(
   ],
   validate,
   prospectController.submitStudent
+);
+
+// ---- Lead Magnet ----
+router.post(
+  '/leads',
+  submissionLimiter,
+  [
+    body('email').isEmail().withMessage('Valid email required')
+  ],
+  validate,
+  leadController.capture
 );
 
 // ---- Products ----
