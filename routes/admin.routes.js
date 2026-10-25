@@ -49,6 +49,7 @@ router.delete('/uploads/product/*publicId', uploadController.deleteProductImage)
 // ---- Analytics ----
 router.get('/analytics/sources', analyticsController.sources);
 router.get('/analytics/overview', analyticsController.overview);
+router.get('/analytics/referrals', analyticsController.referrals);
 
 // ---- Reviews ----
 router.get('/reviews', reviewController.listAdmin);

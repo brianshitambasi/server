@@ -81,3 +81,17 @@ exports.overview = asyncHandler(async (req, res) => {
     daily
   });
 });
+
+// NEW — Referral Leaderboard
+exports.referrals = asyncHandler(async (req, res) => {
+  const rows = await Prospect.aggregate([
+    { $match: { referralCode: { $ne: '', $exists: true } } },
+    { $group: { _id: '$referralCode', count: { $sum: 1 } } },
+    { $sort: { count: -1 } },
+    { $limit: 20 }
+  ]);
+  res.json({
+    success: true,
+    items: rows.map((r) => ({ code: r._id, count: r.count }))
+  });
+});
