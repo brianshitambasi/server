@@ -6,6 +6,7 @@ const prospectController = require('../controllers/prospect.controller');
 const productController = require('../controllers/product.controller');
 const reviewController = require('../controllers/review.controller');
 const leadController = require('../controllers/lead.controller');
+const postController = require('../controllers/post.controller');
 const validate = require('../middleware/validate.middleware');
 const { submissionLimiter } = require('../middleware/rateLimit.middleware');
 
@@ -84,6 +85,10 @@ router.post(
   validate,
   leadController.capture
 );
+
+// ---- Blog ----
+router.get('/posts', postController.listPublic);
+router.get('/posts/:slug', postController.getPublic);
 
 // ---- Products ----
 router.get('/products', productController.listPublic);

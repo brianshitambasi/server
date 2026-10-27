@@ -12,6 +12,7 @@ const analyticsController = require('../controllers/analytics.controller');
 const uploadController = require('../controllers/upload.controller');
 const reviewController = require('../controllers/review.controller');
 const leadController = require('../controllers/lead.controller');
+const postController = require('../controllers/post.controller');
 
 router.use(auth, requireRole('ceo'));
 
@@ -52,6 +53,12 @@ router.get('/analytics/referrals', analyticsController.referrals);
 
 // Leads (Free Guide)
 router.get('/leads', leadController.listAdmin);
+
+// Blog
+router.get('/posts', postController.listAdmin);
+router.post('/posts', postController.create);
+router.patch('/posts/:id', postController.update);
+router.delete('/posts/:id', postController.remove);
 
 // Reviews
 router.get('/reviews', reviewController.listAdmin);
