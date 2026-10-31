@@ -57,8 +57,8 @@ async function sendProspectAlert(prospect) {
         `).join('')}
       </table>
       <div style="margin-top:24px">
-        <a href="https://brianceotnt.devs.li/admin/prospects/${prospect._id}"
-           style="background:#0d6efd;color:#fff;text-decoration:none;padding:10px 18px;border-radius:8px;font-weight:600">
+        <a href="https://brianceotnt.anandd.dev/admin/prospects/${prospect._id}"
+           style="background:#0d6efd;color:#fff;text-decoration:none;padding:10px 18px;border-radius:8px;font-weight:600"> 
           Open in Admin Dashboard
         </a>
       </div>
@@ -97,8 +97,8 @@ async function sendProspectWelcome(prospect) {
         If you haven't already, you can also book a 15-minute Zoom call with me directly to fast-track the process.
       </p>
       <div style="margin-top:20px;margin-bottom:20px">
-        <a href="https://brianceotnt.devs.li/thank-you"
-           style="background:#0d6efd;color:#fff;text-decoration:none;padding:10px 18px;border-radius:8px;font-weight:600">
+        <a href="https://brianceotnt.anandd.dev/thank-you"
+           style="background:#0d6efd;color:#fff;text-decoration:none;padding:10px 18px;border-radius:8px;font-weight:600"> 
           Book a Call
         </a>
       </div>
@@ -121,4 +121,41 @@ async function sendProspectWelcome(prospect) {
   }
 }
 
-module.exports = { sendProspectAlert, sendProspectWelcome };
+// 3. Send Lead Magnet (Free Guide)
+async function sendLeadMagnet(lead) {
+  if (!client) return;
+
+  const firstName = (lead.name || '').split(' ')[0] || 'there';
+
+  const html = `
+    <div style="font-family:Inter,Arial,sans-serif;max-width:560px;padding:24px">
+      <h2 style="margin:0 0 12px;color:#0b1b3b">Hi ${esc(firstName)},</h2>
+      <p style="color:#333;line-height:1.55">
+        Thanks for requesting the free guide! You can download it by clicking the button below.
+      </p>
+      <div style="margin-top:20px;margin-bottom:20px">
+        <a href="https://brianceotnt.anandd.dev/free-guide.pdf"
+           style="background:#0d6efd;color:#fff;text-decoration:none;padding:10px 18px;border-radius:8px;font-weight:600">
+          Download the Guide
+        </a>
+      </div>
+      <p style="color:#6c757d;font-size:13px;margin-top:24px">
+        — Brian (CEO TNT)
+      </p>
+    </div>
+  `;
+
+  try {
+    await client.emails.send({
+      from: FROM,
+      to: lead.email,
+      subject: `Here is your free guide — Brian (CEO TNT)`,
+      html
+    });
+    console.log('[mail] Lead magnet sent to', lead.email);
+  } catch (err) {
+    console.warn('[mail] Lead magnet failed:', err.message);
+  }
+}
+
+module.exports = { sendProspectAlert, sendProspectWelcome, sendLeadMagnet };
