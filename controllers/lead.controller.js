@@ -1,5 +1,6 @@
 const Lead = require('../models/Lead');
 const asyncHandler = require('../utils/asyncHandler');
+const { sendLeadMagnet } = require('../services/mail.service');
 
 exports.capture = asyncHandler(async (req, res) => {
   const { email, name, source, leadType } = req.body;
@@ -14,6 +15,17 @@ exports.capture = asyncHandler(async (req, res) => {
     },
     { new: true, upsert: true, setDefaultsOnInsert: true }
   );
+
+  // Force the email to send and log it
+  console.log('Attempting to send free guide to:', email);
+  
+  if (sendLeadMagnet) {
+    sendLeadMagnet(lead)
+      .then(() => console.log('Email process finished successfully'))
+      .catch((err) => console.error('Email process failed:', err.message));
+  } else {
+    console.error('sendLeadMagnet function is missing!');
+  }
 
   res.status(201).json({ success: true, message: 'Thank you — check your inbox.' });
 });
