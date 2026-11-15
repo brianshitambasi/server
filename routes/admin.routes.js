@@ -13,6 +13,7 @@ const uploadController = require('../controllers/upload.controller');
 const reviewController = require('../controllers/review.controller');
 const leadController = require('../controllers/lead.controller');
 const postController = require('../controllers/post.controller');
+const backupController = require('../controllers/backup.controller');
 
 router.use(auth, requireRole('ceo'));
 
@@ -65,4 +66,5 @@ router.get('/reviews', reviewController.listAdmin);
 router.patch('/reviews/:id', reviewController.updateAdmin);
 router.delete('/reviews/:id', reviewController.deleteAdmin);
 
+router.get('/backup/download', backupController.download);
 module.exports = router;
